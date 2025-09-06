@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: fordonsadmin
+      POSTGRES_PASSWORD: secret123
+      POSTGRES_DB: fordonspark
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    build: ./backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://fordonsadmin:secret123@db:5432/fordonspark
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build: ./frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  db_data:
